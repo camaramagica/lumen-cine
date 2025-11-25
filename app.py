@@ -7,10 +7,10 @@ st.set_page_config(
     page_title="Lumen AI",
     page_icon="🎬",
     layout="centered",
-    initial_sidebar_state="collapsed" # Colapsado por defecto ya que usaremos el menú central
+    initial_sidebar_state="collapsed" 
 )
 
-# --- ESTILOS VISUALES (CSS GOLD & PRIVACY) ---
+# --- ESTILOS VISUALES (CLEAN DESIGN) ---
 st.markdown("""
     <style>
     /* 1. FONDO DEGRADADO DORADO/ANARANJADO */
@@ -19,13 +19,13 @@ st.markdown("""
         background-attachment: fixed;
     }
 
-    /* 2. OCULTAR BARRA SUPERIOR Y MENÚS (PRIVACIDAD TOTAL) */
+    /* 2. PRIVACIDAD: OCULTAR MENÚS */
     #MainMenu {visibility: hidden;}
     header {visibility: hidden;}
     footer {visibility: hidden;}
     .stDeployButton {display:none;}
     
-    /* 3. ESTILO DE BOTONES PERSONALIZADOS */
+    /* 3. BOTONES PERSONALIZADOS */
     .stButton>button {
         background-color: #2D2D2D; 
         color: #Fce38a;
@@ -42,33 +42,26 @@ st.markdown("""
         transform: scale(1.02);
     }
 
-    /* 4. TIPOGRAFÍA Y TEXTOS */
+    /* 4. TIPOGRAFÍA */
     h1, h2, h3 { color: #2D2D2D !important; font-family: 'Helvetica', sans-serif; }
-    .stMarkdown p { color: #1a1a1a; font-weight: 500; }
     
-    /* 5. CAJAS DE CONTENIDO (PANELES) */
-    .css-1r6slb0, .stMarkdown {
-        background-color: rgba(255, 255, 255, 0.4);
-        padding: 15px;
-        border-radius: 10px;
-    }
-    
-    /* 6. TARJETAS DE PELÍCULAS */
+    /* 5. TARJETAS DE PELÍCULAS (Solo para el recomendador) */
     .movie-card {
-        background-color: rgba(255, 255, 255, 0.85);
+        background-color: rgba(255, 255, 255, 0.9);
         padding: 20px;
         border-radius: 15px;
         border-left: 6px solid #f38181;
         margin-top: 10px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
+    
+    /* ELIMINADO EL BLOQUE QUE GENERABA LAS BARRAS BLANCAS */
     </style>
     """, unsafe_allow_html=True)
 
 # --- CLASE PRINCIPAL ---
 class LumenApp:
     def __init__(self):
-        # Inicializar estado
         if 'page' not in st.session_state:
             st.session_state.page = "🏠 Inicio"
 
@@ -76,44 +69,32 @@ class LumenApp:
         st.session_state.page = page_name
 
     def render_navigation(self):
-        """
-        NUEVO SISTEMA DE NAVEGACIÓN
-        Crea un panel superior visible siempre para cambiar de función
-        sin depender de la barra lateral oculta.
-        """
         st.markdown("---")
         col1, col2 = st.columns([3, 1])
         
         with col1:
-            # Selector de Módulo (Funciona como "El Botón" para ir a otras funciones)
             opciones = ["🏠 Inicio", "🍿 Recomendador", "🎨 Inspiración Visual", "💾 Calculadora Data", "🔭 Lentes", "⏱️ Rodaje"]
-            
-            # Encontrar el índice actual para mantener la selección
             try:
                 index_actual = opciones.index(st.session_state.page)
             except:
                 index_actual = 0
                 
-            destino = st.selectbox("📍 **MENÚ DE NAVEGACIÓN RÁPIDA:**", opciones, index=index_actual, label_visibility="collapsed")
+            destino = st.selectbox("📍 **MENÚ RÁPIDO:**", opciones, index=index_actual, label_visibility="collapsed")
             
-            # Si el usuario cambia la selección, actualizamos la página
             if destino != st.session_state.page:
                 st.session_state.page = destino
                 st.rerun()
 
         with col2:
-            # Botón rápido para volver al Home si estás perdido
             if st.button("🏠 Home"):
                 st.session_state.page = "🏠 Inicio"
                 st.rerun()
         st.markdown("---")
 
     def main(self):
-        # 1. Renderizar la navegación SIEMPRE arriba
         if st.session_state.page != "🏠 Inicio":
             self.render_navigation()
 
-        # 2. Lógica de enrutamiento
         page = st.session_state.page
 
         if page == "🏠 Inicio":
@@ -133,14 +114,9 @@ class LumenApp:
     def home_page(self):
         st.title("🎬 Lumen AI")
         st.markdown("### Asistente de Producción Cinematográfica")
+        st.markdown("Bienvenido al sistema **Lumen Gold Edition**.")
         
-        st.markdown("""
-        Bienvenido al sistema **Lumen Gold Edition**.
-        
-        Selecciona una herramienta para comenzar:
-        """)
-        
-        # Botones grandes para la Home
+        # Botones grandes
         c1, c2 = st.columns(2)
         c3, c4 = st.columns(2)
         c5, c6 = st.columns(2)
@@ -162,7 +138,6 @@ class LumenApp:
         st.header("🍿 Lumen Recomienda")
         genre = st.selectbox("Elige un Género:", ["Ciencia Ficción", "Terror", "Drama", "Comedia", "Fotografía Épica", "Animación", "Thriller"])
         
-        # Base de datos (Mantenida completa)
         library = {
             "Ciencia Ficción": ["Blade Runner 2049", "Dune", "Arrival", "Ex Machina", "Interstellar", "2001: Odisea del Espacio", "Matrix", "Alien", "Children of Men", "Her", "Gattaca", "Under the Skin", "Moon", "District 9", "Dark City", "Solaris", "Stalker", "Metropolis", "Brazil", "Inception", "Tenet", "The Thing", "E.T.", "Close Encounters", "Contact", "Primer", "Coherence", "Annihilation", "Sunshine", "Ad Astra", "Minority Report", "Edge of Tomorrow", "Looper", "12 Monkeys", "Akira", "Ghost in the Shell", "Paprika", "Donnie Darko", "Source Code", "Videodrome", "The Fly", "Robocop", "Total Recall", "Starship Troopers", "The Fifth Element"],
             "Terror": ["Hereditary", "The Witch", "Midsommar", "The Shining", "Get Out", "Psycho", "The Exorcist", "Alien", "The Thing", "Rosemary's Baby", "Suspiria", "Halloween", "Texas Chainsaw Massacre", "Scream", "The Lighthouse", "It Follows", "Let the Right One In", "Train to Busan", "Raw", "Barbarian", "Talk to Me", "Silence of the Lambs", "Possession", "28 Days Later", "The Cabin in the Woods", "Evil Dead 2", "Blair Witch Project", "REC", "The Others", "Sixth Sense", "Poltergeist", "Carrie", "The Omen", "Hellraiser", "Candyman", "Babadook", "Saint Maud", "X", "Pearl", "Men", "Us", "Funny Games", "Audition"],
@@ -189,7 +164,6 @@ class LumenApp:
     def creative_assistant(self):
         st.header("🎨 Director Creativo")
         emotion = st.select_slider("¿Qué atmósfera buscas?", options=["Calma", "Nostalgia", "Romance", "Tensión", "Miedo", "Caos"])
-        
         st.info(f"Análisis Técnico para: {emotion}")
         
         if emotion == "Calma":
