@@ -112,7 +112,7 @@ class LumenApp:
 
     # --- PÁGINA PRINCIPAL ---
     def home_page(self):
-        st.title("🎬 Lumen AI")
+        st.title("lumen.png Lumen")
         st.markdown("### Asistente de Producción Cinematográfica")
         st.markdown("Bienvenido al sistema **Lumen Gold Edition**.")
         
@@ -212,5 +212,6 @@ class LumenApp:
 if __name__ == "__main__":
     app = LumenApp()
     app.main()
+
 
 
