@@ -5,7 +5,7 @@ import time
 # --- CONFIGURACIÓN DE PÁGINA ---
 st.set_page_config(
     page_title="Lumen AI",
-    page_icon="🎬",
+    page_icon="lumen.png",
     layout="centered",
     initial_sidebar_state="collapsed" 
 )
@@ -212,3 +212,4 @@ class LumenApp:
 if __name__ == "__main__":
     app = LumenApp()
     app.main()
+
