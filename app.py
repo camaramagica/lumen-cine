@@ -1,15 +1,13 @@
 import streamlit as st
 import random
 import time
-from PIL import Image
-import os
 
 # --- CONFIGURACIÓN DE PÁGINA ---
 st.set_page_config(
     page_title="Lumen AI",
     page_icon="🎬",
     layout="centered",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed" # Colapsado por defecto ya que usaremos el menú central
 )
 
 # --- ESTILOS VISUALES (CSS GOLD & PRIVACY) ---
@@ -21,46 +19,48 @@ st.markdown("""
         background-attachment: fixed;
     }
 
-    /* 2. OCULTAR MENÚS DE STREAMLIT (PRIVACIDAD) */
+    /* 2. OCULTAR BARRA SUPERIOR Y MENÚS (PRIVACIDAD TOTAL) */
     #MainMenu {visibility: hidden;}
     header {visibility: hidden;}
     footer {visibility: hidden;}
     .stDeployButton {display:none;}
     
-    /* 3. ESTILO DE BOTONES (PRO) */
+    /* 3. ESTILO DE BOTONES PERSONALIZADOS */
     .stButton>button {
-        background-color: #2D2D2D; /* Botón oscuro para contraste */
-        color: #Fce38a; /* Texto dorado */
-        border-radius: 10px;
+        background-color: #2D2D2D; 
+        color: #Fce38a;
+        border-radius: 8px;
         border: 2px solid #f38181;
         font-weight: bold;
         width: 100%;
-        height: 3.5em;
         transition: all 0.3s;
     }
     .stButton>button:hover {
         background-color: #f38181;
         color: white;
         border-color: #2D2D2D;
+        transform: scale(1.02);
     }
 
-    /* 4. TIPOGRAFÍA */
-    h1, h2, h3 {
-        color: #2D2D2D !important;
-        font-family: 'Helvetica', sans-serif;
-    }
-    .stMarkdown p {
-        color: #1a1a1a;
-        font-weight: 500;
+    /* 4. TIPOGRAFÍA Y TEXTOS */
+    h1, h2, h3 { color: #2D2D2D !important; font-family: 'Helvetica', sans-serif; }
+    .stMarkdown p { color: #1a1a1a; font-weight: 500; }
+    
+    /* 5. CAJAS DE CONTENIDO (PANELES) */
+    .css-1r6slb0, .stMarkdown {
+        background-color: rgba(255, 255, 255, 0.4);
+        padding: 15px;
+        border-radius: 10px;
     }
     
-    /* 5. TARJETAS DE PELÍCULAS */
+    /* 6. TARJETAS DE PELÍCULAS */
     .movie-card {
-        background-color: rgba(255, 255, 255, 0.6);
+        background-color: rgba(255, 255, 255, 0.85);
         padding: 20px;
         border-radius: 15px;
-        border-left: 5px solid #f38181;
-        margin-bottom: 20px;
+        border-left: 6px solid #f38181;
+        margin-top: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
     </style>
     """, unsafe_allow_html=True)
@@ -68,86 +68,101 @@ st.markdown("""
 # --- CLASE PRINCIPAL ---
 class LumenApp:
     def __init__(self):
-        # Inicializar estado de navegación
+        # Inicializar estado
         if 'page' not in st.session_state:
-            st.session_state.page = "Home"
+            st.session_state.page = "🏠 Inicio"
 
-    def navigate_to(self, page):
-        st.session_state.page = page
+    def navigate_to(self, page_name):
+        st.session_state.page = page_name
 
-    def render_sidebar(self):
-        with st.sidebar:
-            st.header("🎛️ Menú Lumen")
+    def render_navigation(self):
+        """
+        NUEVO SISTEMA DE NAVEGACIÓN
+        Crea un panel superior visible siempre para cambiar de función
+        sin depender de la barra lateral oculta.
+        """
+        st.markdown("---")
+        col1, col2 = st.columns([3, 1])
+        
+        with col1:
+            # Selector de Módulo (Funciona como "El Botón" para ir a otras funciones)
+            opciones = ["🏠 Inicio", "🍿 Recomendador", "🎨 Inspiración Visual", "💾 Calculadora Data", "🔭 Lentes", "⏱️ Rodaje"]
             
-            # Botones de navegación personalizados
-            if st.button("🏠 INICIO"): self.navigate_to("Home")
-            st.markdown("---")
-            if st.button("🍿 Recomendador"): self.navigate_to("Recommender")
-            if st.button("🎨 Inspiración Visual"): self.navigate_to("Creative")
-            if st.button("💾 Calculadora Data"): self.navigate_to("Data")
-            if st.button("🔭 Lentes"): self.navigate_to("Lens")
-            if st.button("⏱️ Rodaje"): self.navigate_to("Scheduler")
+            # Encontrar el índice actual para mantener la selección
+            try:
+                index_actual = opciones.index(st.session_state.page)
+            except:
+                index_actual = 0
+                
+            destino = st.selectbox("📍 **MENÚ DE NAVEGACIÓN RÁPIDA:**", opciones, index=index_actual, label_visibility="collapsed")
             
-            st.markdown("---")
-            st.caption("Lumen v5.0 Gold Edition")
-            st.caption("Sistema Privado")
+            # Si el usuario cambia la selección, actualizamos la página
+            if destino != st.session_state.page:
+                st.session_state.page = destino
+                st.rerun()
+
+        with col2:
+            # Botón rápido para volver al Home si estás perdido
+            if st.button("🏠 Home"):
+                st.session_state.page = "🏠 Inicio"
+                st.rerun()
+        st.markdown("---")
 
     def main(self):
-        self.render_sidebar()
+        # 1. Renderizar la navegación SIEMPRE arriba
+        if st.session_state.page != "🏠 Inicio":
+            self.render_navigation()
 
-        # LÓGICA DE NAVEGACIÓN
+        # 2. Lógica de enrutamiento
         page = st.session_state.page
 
-        if page == "Home":
+        if page == "🏠 Inicio":
             self.home_page()
-        elif page == "Recommender":
+        elif page == "🍿 Recomendador":
             self.movie_recommender()
-        elif page == "Creative":
+        elif page == "🎨 Inspiración Visual":
             self.creative_assistant()
-        elif page == "Data":
+        elif page == "💾 Calculadora Data":
             self.data_calculator()
-        elif page == "Lens":
+        elif page == "🔭 Lentes":
             self.lens_analyzer()
-        elif page == "Scheduler":
+        elif page == "⏱️ Rodaje":
             self.scheduler()
 
-    # --- PÁGINA PRINCIPAL (HOME) ---
+    # --- PÁGINA PRINCIPAL ---
     def home_page(self):
-        # Intentar cargar el logo
-        try:
-            # Busca el archivo lumen.jpg en el directorio
-            st.image("lumen.png", width=300) 
-        except:
-            st.warning("⚠️ No encuentro 'lumen.png'. Asegúrate de subir la foto a GitHub.")
-            st.title("🤖 Lumen")
-
-        st.title("Bienvenido, Director.")
+        st.title("🎬 Lumen AI")
+        st.markdown("### Asistente de Producción Cinematográfica")
+        
         st.markdown("""
-        ### Soy Lumen, tu asistente de producción impulsado por IA.
+        Bienvenido al sistema **Lumen Gold Edition**.
         
-        Estoy diseñado para asistirte en cada etapa de tu proceso creativo:
-        
-        * **Bloqueo creativo?** Pídeme una película.
-        * **¿Dudas técnicas?** Calculo el espacio en disco y lentes.
-        * **¿Pre-producción?** Organizo tu plan de rodaje.
-        
-        👈 **Usa el menú de la izquierda para comenzar.**
+        Selecciona una herramienta para comenzar:
         """)
         
-        col1, col2, col3 = st.columns(3)
-        with col2:
-            if st.button("🚀 INICIAR SISTEMA"):
-                self.navigate_to("Recommender")
-
+        # Botones grandes para la Home
+        c1, c2 = st.columns(2)
+        c3, c4 = st.columns(2)
+        c5, c6 = st.columns(2)
+        
+        with c1: 
+            if st.button("🍿 CINE RECOMENDADOR"): self.navigate_to("🍿 Recomendador"); st.rerun()
+        with c2: 
+            if st.button("🎨 DIRECTOR CREATIVO"): self.navigate_to("🎨 Inspiración Visual"); st.rerun()
+        with c3: 
+            if st.button("💾 DATA CALCULATOR"): self.navigate_to("💾 Calculadora Data"); st.rerun()
+        with c4: 
+            if st.button("🔭 LENTES Y ÓPTICA"): self.navigate_to("🔭 Lentes"); st.rerun()
+        with c5: 
+            if st.button("⏱️ PLAN DE RODAJE"): self.navigate_to("⏱️ Rodaje"); st.rerun()
+            
     # --- MÓDULOS ---
     
     def movie_recommender(self):
         st.header("🍿 Lumen Recomienda")
-        st.markdown("Base de datos desbloqueada. 500+ Títulos.")
+        genre = st.selectbox("Elige un Género:", ["Ciencia Ficción", "Terror", "Drama", "Comedia", "Fotografía Épica", "Animación", "Thriller"])
         
-        genre = st.selectbox("Género:", ["Ciencia Ficción", "Terror", "Drama", "Comedia", "Fotografía Épica", "Animación", "Thriller"])
-        
-        # (LISTAS ABREVIADAS PARA EL EJEMPLO - EN TU CÓDIGO FINAL MANTÉN LAS LISTAS LARGAS)
+        # Base de datos (Mantenida completa)
         library = {
             "Ciencia Ficción": ["Blade Runner 2049", "Dune", "Arrival", "Ex Machina", "Interstellar", "2001: Odisea del Espacio", "Matrix", "Alien", "Children of Men", "Her", "Gattaca", "Under the Skin", "Moon", "District 9", "Dark City", "Solaris", "Stalker", "Metropolis", "Brazil", "Inception", "Tenet", "The Thing", "E.T.", "Close Encounters", "Contact", "Primer", "Coherence", "Annihilation", "Sunshine", "Ad Astra", "Minority Report", "Edge of Tomorrow", "Looper", "12 Monkeys", "Akira", "Ghost in the Shell", "Paprika", "Donnie Darko", "Source Code", "Videodrome", "The Fly", "Robocop", "Total Recall", "Starship Troopers", "The Fifth Element"],
             "Terror": ["Hereditary", "The Witch", "Midsommar", "The Shining", "Get Out", "Psycho", "The Exorcist", "Alien", "The Thing", "Rosemary's Baby", "Suspiria", "Halloween", "Texas Chainsaw Massacre", "Scream", "The Lighthouse", "It Follows", "Let the Right One In", "Train to Busan", "Raw", "Barbarian", "Talk to Me", "Silence of the Lambs", "Possession", "28 Days Later", "The Cabin in the Woods", "Evil Dead 2", "Blair Witch Project", "REC", "The Others", "Sixth Sense", "Poltergeist", "Carrie", "The Omen", "Hellraiser", "Candyman", "Babadook", "Saint Maud", "X", "Pearl", "Men", "Us", "Funny Games", "Audition"],
@@ -159,13 +174,13 @@ class LumenApp:
         }
         
         if st.button("🎲 SORPRENDEME LUMEN"):
-            with st.spinner("Consultando archivos..."):
+            with st.spinner("Buscando joya oculta..."):
                 time.sleep(0.5)
                 movie = random.choice(library[genre])
                 st.markdown(f"""
                 <div class="movie-card">
                     <h2>🎬 {movie}</h2>
-                    <p>Género: {genre}</p>
+                    <p style="color:#444;">Género: <b>{genre}</b></p>
                     <p><i>"Una elección perfecta para hoy."</i></p>
                 </div>
                 """, unsafe_allow_html=True)
@@ -173,49 +188,51 @@ class LumenApp:
 
     def creative_assistant(self):
         st.header("🎨 Director Creativo")
-        emotion = st.select_slider("Intensidad Emocional", options=["Calma", "Nostalgia", "Romance", "Tensión", "Miedo", "Caos"])
+        emotion = st.select_slider("¿Qué atmósfera buscas?", options=["Calma", "Nostalgia", "Romance", "Tensión", "Miedo", "Caos"])
         
-        st.info(f"Análisis para: {emotion}")
+        st.info(f"Análisis Técnico para: {emotion}")
         
         if emotion == "Calma":
-            st.write("Lente: 35mm o 50mm. Luz suave y difusa. Trípode fijo.")
+            st.write("📹 **Lente:** 35mm o 50mm. \n💡 **Luz:** Suave y difusa. \n📐 **Soporte:** Trípode fijo.")
         elif emotion == "Nostalgia":
-            st.write("Lente: Vintage/Anamórfico. Luz: Golden Hour. Filtros de difusión.")
+            st.write("📹 **Lente:** Vintage/Anamórfico. \n💡 **Luz:** Golden Hour (Cálida). \n🌫️ **Filtro:** ProMist 1/4.")
         elif emotion == "Tensión":
-            st.write("Lente: 85mm+ (Compresión). Luz: Clave baja. Ángulos cerrados.")
+            st.write("📹 **Lente:** 85mm+ (Compresión). \n💡 **Luz:** Clave baja (Sombras duras). \n📐 **Ángulo:** Cerrados.")
         elif emotion == "Miedo":
-            st.write("Lente: Gran Angular distorsionado. Luz: Sombras duras. Ángulo: Picado.")
+            st.write("📹 **Lente:** Gran Angular distorsionado. \n💡 **Luz:** Cenital o desde abajo. \n📐 **Ángulo:** Picado.")
         elif emotion == "Caos":
-            st.write("Cámara en mano (Shaky cam). Obturador a 45 grados. Cortes rápidos.")
+            st.write("📹 **Cámara:** En mano (Shaky cam). \n⚙️ **Obturador:** 45 grados (Staccato). \n✂️ **Edición:** Cortes rápidos.")
         else:
-            st.write("Busca poca profundidad de campo (f/1.8) para aislar a los personajes.")
+            st.write("Busca poca profundidad de campo (f/1.8) para aislar a los personajes y colores pastel.")
 
     def data_calculator(self):
-        st.header("💾 Calculadora")
+        st.header("💾 Calculadora de Data")
         c1, c2 = st.columns(2)
         res = c1.selectbox("Resolución", ["1080p", "4K", "6K", "8K"])
         fps = c2.number_input("FPS", value=24)
-        mins = st.slider("Minutos", 1, 300, 10)
+        mins = st.slider("Minutos de grabación", 1, 300, 10)
         
         bitrates = {"1080p": 185, "4K": 750, "6K": 1800, "8K": 2600}
         gb = ((bitrates[res] * (fps/24) * 60 * mins) / 8) / 1024
         
-        st.success(f"Espacio Estimado: {gb:.2f} GB")
+        st.success(f"Espacio Estimado (ProRes HQ): {gb:.2f} GB")
 
     def lens_analyzer(self):
-        st.header("🔭 Óptica")
-        mm = st.slider("Milímetros (mm)", 8, 200, 50)
-        st.subheader(f"{mm}mm")
-        if mm < 35: st.write("GRAN ANGULAR: Expande el espacio.")
-        elif mm < 55: st.write("NORMAL: Visión humana.")
-        else: st.write("TELEOBJETIVO: Comprime el fondo.")
+        st.header("🔭 Analizador de Lentes")
+        mm = st.slider("Distancia Focal (mm)", 8, 200, 50)
+        st.subheader(f"Lente: {mm}mm")
+        if mm < 35: st.write("📷 **GRAN ANGULAR:** Expande el espacio. Ideal para paisajes o distorsión.")
+        elif mm < 55: st.write("👁️ **NORMAL:** Visión humana natural. Ideal documental y diálogo.")
+        else: st.write("🔭 **TELEOBJETIVO:** Comprime el fondo. Ideal retratos y acción lejana.")
 
     def scheduler(self):
         st.header("⏱️ Plan de Rodaje")
-        pags = st.number_input("Páginas", value=90)
-        ritmo = st.number_input("Páginas/Día", value=4.0)
+        c1, c2 = st.columns(2)
+        pags = c1.number_input("Páginas del Guion", value=90)
+        ritmo = c2.number_input("Páginas por Día", value=4.0)
         if ritmo > 0:
-            st.metric("Días estimados", f"{pags/ritmo:.1f}")
+            dias = pags / ritmo
+            st.metric("Días estimados", f"{dias:.1f}", delta=f"Aprox {dias/5:.1f} Semanas")
 
 # EJECUCIÓN
 if __name__ == "__main__":
